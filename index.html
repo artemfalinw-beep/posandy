@@ -72,6 +72,7 @@
   }
   header.topbar .actions{ display:flex; gap:10px; align-items:center;}
   .icon-btn{
+    position:relative;
     background:rgba(255,255,255,0.08);
     color:#fff;
     padding:9px 14px;
@@ -81,6 +82,21 @@
     transition:background .15s;
   }
   .icon-btn:hover{ background:rgba(255,255,255,0.18); }
+
+  .badge-dot{
+    position:absolute;
+    top:-3px; right:-3px;
+    width:12px; height:12px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 0 rgba(192,80,63,0.6);
+    animation:badge-pulse 1.4s infinite;
+  }
+  @keyframes badge-pulse{
+    0%{ box-shadow:0 0 0 0 rgba(192,80,63,0.55); }
+    70%{ box-shadow:0 0 0 7px rgba(192,80,63,0); }
+    100%{ box-shadow:0 0 0 0 rgba(192,80,63,0); }
+  }
 
   main{ flex:1; overflow:auto; padding:22px; }
 
@@ -362,7 +378,7 @@
     <div class="brand"><span class="dot"></span> Kassensystem</div>
     <div class="actions">
       <button class="icon-btn" id="btnBack" style="display:none;">← Tische</button>
-      <button class="icon-btn" id="btnTickets">🧾 Neue Bestellungen</button>
+      <button class="icon-btn" id="btnTickets">🧾 Neue Bestellungen<span class="badge-dot hidden" id="ticketBadge"></span></button>
       <button class="icon-btn" id="btnSettings">⚙ Einstellungen</button>
     </div>
   </header>
@@ -680,6 +696,14 @@
         uidCounter
       }));
     }catch(e){ console.warn('Speichern fehlgeschlagen:', e); }
+    updateTicketBadge();
+  }
+
+  function updateTicketBadge(){
+    const hasPending = Object.values(state.tables).some(t =>
+      Object.keys(t.pending.drinks).length > 0 || Object.keys(t.pending.food).length > 0
+    );
+    document.getElementById('ticketBadge').classList.toggle('hidden', !hasPending);
   }
 
   function normalizeTable(t){
@@ -722,6 +746,7 @@
     initTables();
     persist();
   }
+  updateTicketBadge();
 
   const fmt = (n) => n.toFixed(2).replace('.', ',') + ' €';
 
